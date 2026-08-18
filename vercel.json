@@ -1,12 +1,8 @@
 {
-  "framework": null,
-  "installCommand": "bun install",
+  "bunVersion": "1.x",
   "functions": {
-    "api/index.ts": {
-      "maxDuration": 30
+    "src/index.ts": {
+      "includeFiles": "data/regions.json"
     }
-  },
-  "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/api/index.ts" }
-  ]
+  }
 }
