@@ -1,3 +1,4 @@
+import "hono";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -51,13 +52,9 @@ app.get("/docs", (c) => {
   return c.html(swaggerHtml);
 });
 
-const port = Number(process.env.PORT) || 3000;
+export default app;
 
-if (!process.env.VERCEL) {
+if (import.meta.main) {
+  const port = Number(process.env.PORT) || 3000;
   console.log(`api-waktu running on http://localhost:${port}`);
 }
-
-export default {
-  port,
-  fetch: app.fetch,
-};
