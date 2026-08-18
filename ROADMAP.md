@@ -40,8 +40,8 @@
 - [x] Dokumentasi API (README + contoh request/response)
 
 ## Fase 6 — Publish
-- [ ] Publish ke GitHub (open source)
-- [ ] Tulis README dengan contoh penggunaan
+- [x] Publish ke GitHub (open source)
+- [x] Tulis README dengan contoh penggunaan
 - [ ] (Opsional) deploy demo instance publik
 
 ## Backlog / Fase 2 Produk (belum prioritas)
