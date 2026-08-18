@@ -46,6 +46,66 @@ export const KEMENAG: PrayerTimesParams = {
   madhab: "shafi",
 };
 
+export const METHODS: Record<string, PrayerTimesParams> = {
+  Kemenag: KEMENAG,
+  ISNA: {
+    fajrAngle: 15,
+    ishaAngle: 15,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+  MWL: {
+    fajrAngle: 18,
+    ishaAngle: 17,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+  Egypt: {
+    fajrAngle: 19.5,
+    ishaAngle: 17.5,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+  Karachi: {
+    fajrAngle: 18,
+    ishaAngle: 18,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "hanafi",
+  },
+  Tehran: {
+    fajrAngle: 17.7,
+    ishaAngle: 14,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+  JAKIM: {
+    fajrAngle: 20,
+    ishaAngle: 18,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+  Singapore: {
+    fajrAngle: 20,
+    ishaAngle: 18,
+    ishaInterval: 0,
+    methodAdjustments: { fajr: 0, sunrise: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 },
+    rounding: "nearest",
+    madhab: "shafi",
+  },
+};
+
 function formatTime(hours: number): string {
   let h = Math.floor(hours);
   let m = Math.floor((hours - h) * 60 + 0.5);

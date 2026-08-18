@@ -45,7 +45,7 @@
 - [ ] (Opsional) deploy demo instance publik
 
 ## Backlog / Fase 2 Produk (belum prioritas)
-- [ ] Endpoint jadwal sholat kalender bulanan
-- [ ] Parameter hisab custom (ISNA, MWL, dll) untuk dukungan negara lain
+- [x] Endpoint jadwal sholat kalender bulanan
+- [x] Parameter hisab custom (ISNA, MWL, dll) untuk dukungan negara lain
 - [ ] Integrasi data resmi Kemenag jika sumbernya ditemukan
-- [ ] Rate limiting & API key untuk publik skala besar
+- [x] Rate limiting & API key untuk publik skala besar

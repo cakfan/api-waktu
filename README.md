@@ -82,13 +82,14 @@ Get full Hijri month with Gregorian equivalent for each day.
 
 #### `GET /prayer-times?lat=&long=&date=YYYY-MM-DD`
 
-Get daily prayer times for a location. Uses Kemenag RI method (Fajr 20°, Isha 18°, Shafi madhab).
+Get daily prayer times for a location. Default method: Kemenag RI.
 
 ```json
 {
   "date": { "year": 2026, "month": 8, "day": 18 },
   "coordinates": { "latitude": -6.2088, "longitude": 106.8456 },
   "method": "Kemenag",
+  "timezone": "UTC+7",
   "times": {
     "fajr": "04:41",
     "sunrise": "05:59",
@@ -100,11 +101,29 @@ Get daily prayer times for a location. Uses Kemenag RI method (Fajr 20°, Isha 1
 }
 ```
 
-#### `GET /prayer-times?districtCode=31.71.01&date=YYYY-MM-DD`
+Optional params: `method` (Kemenag, ISNA, MWL, Egypt, Karachi, Tehran, JAKIM, Singapore), `tz` (UTC offset, default auto from longitude), `districtCode`.
 
-Get prayer times by kecamatan code (uses region database for coordinates).
+#### `GET /prayer-times/month?lat=&long=&year=&month=`
 
-**Limitasi**: Menggunakan algoritma hisab matematis berdasarkan "Astronomical Algorithms" by Jean Meeus (sama seperti adhan-js). Hasil bisa berbeda ±1-2 menit dari jadwal resmi Kemenag yang mungkin menggunakan metode atau tuning tambahan. Waktu zona: WIB (UTC+7) secara default.
+Get prayer times for every day in a month.
+
+```json
+{
+  "year": 2026, "month": 8,
+  "coordinates": { "latitude": -6.2088, "longitude": 106.8456 },
+  "method": "Kemenag",
+  "timezone": "UTC+7",
+  "daysInMonth": 31,
+  "days": [
+    { "day": 1, "times": { "fajr": "04:43", "sunrise": "06:04", ... } },
+    { "day": 2, "times": { "fajr": "04:43", "sunrise": "06:04", ... } }
+  ]
+}
+```
+
+**Calculation Methods**: Kemenag (Indonesia), ISNA (North America), MWL (Muslim World League), Egypt, Karachi (Pakistan/India), Tehran (Iran), JAKIM (Malaysia), Singapore.
+
+**Limitasi**: Menggunakan algoritma hisab matematis berdasarkan "Astronomical Algorithms" by Jean Meeus. Hasil bisa berbeda ±1-2 menit dari jadwal resmi yang mungkin menggunakan metode atau tuning tambahan. Timezone auto-detect dari longitude, gunakan `?tz=` untuk override (contoh: `?tz=7` untuk WIB).
 
 ### Region Lookup
 

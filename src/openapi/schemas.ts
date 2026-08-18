@@ -64,6 +64,31 @@ export const PrayerTimesResponseSchema = z.object({
   }),
 });
 
+export const PrayerTimesDaySchema = z.object({
+  day: z.number(),
+  times: z.object({
+    fajr: z.string(),
+    sunrise: z.string(),
+    dhuhr: z.string(),
+    asr: z.string(),
+    maghrib: z.string(),
+    isha: z.string(),
+  }),
+});
+
+export const PrayerTimesMonthResponseSchema = z.object({
+  year: z.number(),
+  month: z.number(),
+  coordinates: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }),
+  method: z.string(),
+  timezone: z.string(),
+  daysInMonth: z.number(),
+  days: z.array(PrayerTimesDaySchema),
+});
+
 export const RegionResponseSchema = z.object({
   provinceCode: z.string(),
   provinceName: z.string(),

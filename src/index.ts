@@ -6,11 +6,13 @@ import calendarRoutes from "./openapi/routes/calendar";
 import prayerTimesRoutes from "./openapi/routes/prayer-times";
 import regionsRoutes from "./openapi/routes/regions";
 import { swaggerHtml } from "./openapi/swagger-html";
+import { rateLimiter } from "./rate-limit";
 
 const app = new OpenAPIHono();
 
 app.use("*", logger());
 app.use("*", cors());
+app.use("*", rateLimiter(60, 60_000));
 
 app.route("/", healthRoutes);
 app.route("/", calendarRoutes);
