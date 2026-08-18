@@ -26,12 +26,12 @@
 - [x] (Opsional lanjutan) tambah level kecamatan jika data tersedia
 
 ## Fase 4 — Engine Jadwal Sholat
-- [ ] Riset & pilih basis algoritma hisab (referensi adhan-js, sesuaikan parameter)
-- [ ] Implementasi perhitungan waktu sholat dari lat/long/tanggal
-- [ ] Kalibrasi parameter sudut Subuh/Isya mendekati konvensi Kemenag RI
-- [ ] Endpoint `GET /prayer-times?lat=&long=&date=`
-- [ ] Endpoint `GET /prayer-times?kecamatan=&date=` (pakai data wilayah dari Fase 3)
-- [ ] Validasi manual: bandingkan hasil hitung vs jadwal resmi Kemenag untuk beberapa kota besar (Jakarta, Surabaya, Bandung, dll)
+- [x] Riset & pilih basis algoritma hisab (referensi adhan-js, sesuaikan parameter)
+- [x] Implementasi perhitungan waktu sholat dari lat/long/tanggal
+- [x] Kalibrasi parameter sudut Subuh/Isya mendekati konvensi Kemenag RI
+- [x] Endpoint `GET /prayer-times?lat=&long=&date=`
+- [x] Endpoint `GET /prayer-times?districtCode=&date=` (pakai data wilayah dari Fase 3)
+- [x] Validasi manual: bandingkan hasil hitung vs jadwal resmi Kemenag untuk beberapa kota besar (Jakarta, Surabaya, Bandung, dll)
 
 ## Fase 5 — Polish & Caching
 - [ ] Cache layer per lokasi per hari (hindari hitung ulang tiap request)

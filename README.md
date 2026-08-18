@@ -80,6 +80,34 @@ Get full Hijri month with Gregorian equivalent for each day.
 }
 ```
 
+### Prayer Times
+
+#### `GET /prayer-times?lat=&long=&date=YYYY-MM-DD`
+
+Get daily prayer times for a location. Uses Kemenag RI method (Fajr 20°, Isha 18°, Shafi madhab).
+
+```json
+{
+  "date": { "year": 2026, "month": 8, "day": 18 },
+  "coordinates": { "latitude": -6.2088, "longitude": 106.8456 },
+  "method": "Kemenag",
+  "times": {
+    "fajr": "04:41",
+    "sunrise": "05:59",
+    "dhuhr": "11:58",
+    "asr": "15:18",
+    "maghrib": "17:55",
+    "isha": "19:05"
+  }
+}
+```
+
+#### `GET /prayer-times?districtCode=31.71.01&date=YYYY-MM-DD`
+
+Get prayer times by kecamatan code (uses region database for coordinates).
+
+**Limitasi**: Menggunakan algoritma hisab matematis berdasarkan "Astronomical Algorithms" by Jean Meeus (sama seperti adhan-js). Hasil bisa berbeda ±1-2 menit dari jadwal resmi Kemenag yang mungkin menggunakan metode atau tuning tambahan. Waktu zona: WIB (UTC+7) secara default.
+
 ### Region Lookup
 
 #### `GET /regions/search?q=`
@@ -140,6 +168,12 @@ src/
   javanese-calendar/
     convert-to-javanese.ts        # Javanese calendar conversion
     convert-to-javanese.test.ts
+  prayer-times/
+    math-utils.ts                 # Degree/radian math utilities
+    astronomical.ts               # Solar position calculations (Jean Meeus)
+    solar-time.ts                 # Solar time (transit, sunrise, sunset)
+    prayer-times.ts               # Prayer times engine (Kemenag method)
+    prayer-times.test.ts
 scripts/
   seed-regions.ts                 # Import kecamatan data to SQLite
 data/

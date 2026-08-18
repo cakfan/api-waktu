@@ -9,6 +9,7 @@ import {
   getHijriMonthName,
   type HijriMonthName,
 } from "./hijri-calendar/convert-to-hijri";
+import { computePrayerTimes } from "./prayer-times/prayer-times";
 import { db } from "./db";
 import { regions } from "./db/schema";
 import { eq, like, sql } from "drizzle-orm";
@@ -28,6 +29,8 @@ app.get("/", (c) => {
       javaneseDate: "GET /javanese-date?date=YYYY-MM-DD",
       hijriDate: "GET /hijri-date?date=YYYY-MM-DD",
       hijriCalendar: "GET /hijri-calendar?year=1446&month=1",
+      prayerTimes: "GET /prayer-times?lat=&long=&date=YYYY-MM-DD",
+      prayerTimesByDistrict: "GET /prayer-times?districtCode=31.71.01&date=YYYY-MM-DD",
       regionSearch: "GET /regions/search?q=",
       regionByCode: "GET /regions/:districtCode",
     },
@@ -144,6 +147,78 @@ app.get("/hijri-calendar", (c) => {
     daysInMonth,
     days,
   });
+});
+
+app.get("/prayer-times", (c) => {
+  const latParam = c.req.query("lat");
+  const longParam = c.req.query("long");
+  const districtCode = c.req.query("districtCode");
+  const dateParam = c.req.query("date");
+
+  let latitude: number;
+  let longitude: number;
+
+  if (districtCode) {
+    const region = db
+      .select()
+      .from(regions)
+      .where(eq(regions.districtCode, districtCode))
+      .get();
+    if (!region) {
+      return c.json({ error: `District not found: ${districtCode}` }, 404);
+    }
+    latitude = region.latitude;
+    longitude = region.longitude;
+  } else if (latParam && longParam) {
+    latitude = Number(latParam);
+    longitude = Number(longParam);
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return c.json({ error: "Invalid latitude or longitude." }, 400);
+    }
+  } else {
+    return c.json(
+      { error: "Provide lat/long or districtCode parameter." },
+      400
+    );
+  }
+
+  let year: number;
+  let month: number;
+  let day: number;
+
+  if (dateParam) {
+    const segments = dateParam.split("-");
+    if (segments.length !== 3 || segments.some((s) => isNaN(Number(s)))) {
+      return c.json(
+        { error: "Invalid date format. Use YYYY-MM-DD." },
+        400
+      );
+    }
+    year = Number(segments[0]);
+    month = Number(segments[1]);
+    day = Number(segments[2]);
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth() + 1;
+    day = now.getDate();
+  }
+
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return c.json({ error: "Invalid date values." }, 400);
+  }
+
+  try {
+    const result = computePrayerTimes(year, month, day, latitude, longitude);
+    return c.json({
+      date: { year, month, day },
+      coordinates: { latitude, longitude },
+      method: "Kemenag",
+      times: result,
+    });
+  } catch {
+    return c.json({ error: "Failed to compute prayer times." }, 500);
+  }
 });
 
 app.get("/regions/search", (c) => {
