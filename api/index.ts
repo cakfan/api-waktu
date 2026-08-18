@@ -1,7 +1,12 @@
+import { handle } from "@hono/node-server/vercel";
 import { createApp } from "../src/app";
 
 const app = createApp();
 
-export default async function handler(request: Request): Promise<Response> {
-  return app.fetch(request);
-}
+export const GET = handle(app);
+export const POST = handle(app);
+export const PUT = handle(app);
+export const DELETE = handle(app);
+export const PATCH = handle(app);
+export const HEAD = handle(app);
+export const OPTIONS = handle(app);
