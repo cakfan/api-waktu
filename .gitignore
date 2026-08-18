@@ -1,0 +1,46 @@
+# dependencies (bun install)
+node_modules
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# database
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# raw region data (copied from api-wilayah-indonesia, run `bun run db:seed` to regenerate)
+data/raw/
+
+# drizzle
+drizzle/
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS) folder config
+.DS_Store
