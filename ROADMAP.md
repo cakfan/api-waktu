@@ -34,10 +34,10 @@
 - [x] Validasi manual: bandingkan hasil hitung vs jadwal resmi Kemenag untuk beberapa kota besar (Jakarta, Surabaya, Bandung, dll)
 
 ## Fase 5 — Polish & Caching
-- [ ] Cache layer per lokasi per hari (hindari hitung ulang tiap request)
-- [ ] Response format konsisten (schema JSON terstandar di semua endpoint)
-- [ ] Error handling & validasi input
-- [ ] Dokumentasi API (README + contoh request/response)
+- [x] Cache layer per lokasi per hari (hindari hitung ulang tiap request)
+- [x] Response format konsisten (helper `parseDate()` reusable, error response seragam)
+- [x] Error handling & validasi input (coordinate range, date format, parameter wajib)
+- [x] Dokumentasi API (README + contoh request/response)
 
 ## Fase 6 — Publish
 - [ ] Publish ke GitHub (open source)

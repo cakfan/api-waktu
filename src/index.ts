@@ -10,6 +10,7 @@ import {
   type HijriMonthName,
 } from "./hijri-calendar/convert-to-hijri";
 import { computePrayerTimes } from "./prayer-times/prayer-times";
+import { prayerTimesCache } from "./cache";
 import { db } from "./db";
 import { regions } from "./db/schema";
 import { eq, like, sql } from "drizzle-orm";
@@ -18,6 +19,33 @@ const app = new Hono();
 
 app.use("*", logger());
 app.use("*", cors());
+
+function parseDate(dateParam: string | undefined): { year: number; month: number; day: number } | { error: string } {
+  let year: number;
+  let month: number;
+  let day: number;
+
+  if (dateParam) {
+    const segments = dateParam.split("-");
+    if (segments.length !== 3 || segments.some((s) => isNaN(Number(s)))) {
+      return { error: "Invalid date format. Use YYYY-MM-DD." };
+    }
+    year = Number(segments[0]);
+    month = Number(segments[1]);
+    day = Number(segments[2]);
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth() + 1;
+    day = now.getDate();
+  }
+
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return { error: "Invalid date values." };
+  }
+
+  return { year, month, day };
+}
 
 app.get("/", (c) => {
   return c.json({
@@ -42,36 +70,11 @@ app.get("/health", (c) => {
 });
 
 app.get("/javanese-date", (c) => {
-  const dateParam = c.req.query("date");
-
-  let year: number;
-  let month: number;
-  let day: number;
-
-  if (dateParam) {
-    const segments = dateParam.split("-");
-    if (segments.length !== 3 || segments.some((s) => isNaN(Number(s)))) {
-      return c.json(
-        { error: "Invalid date format. Use YYYY-MM-DD." },
-        400
-      );
-    }
-    year = Number(segments[0]);
-    month = Number(segments[1]);
-    day = Number(segments[2]);
-  } else {
-    const now = new Date();
-    year = now.getFullYear();
-    month = now.getMonth() + 1;
-    day = now.getDate();
-  }
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return c.json({ error: "Invalid date values." }, 400);
-  }
+  const date = parseDate(c.req.query("date"));
+  if ("error" in date) return c.json({ error: date.error }, 400);
 
   try {
-    const result = convertToJavanese(year, month, day);
+    const result = convertToJavanese(date.year, date.month, date.day);
     return c.json(result);
   } catch {
     return c.json({ error: "Failed to convert date." }, 500);
@@ -79,36 +82,11 @@ app.get("/javanese-date", (c) => {
 });
 
 app.get("/hijri-date", (c) => {
-  const dateParam = c.req.query("date");
-
-  let year: number;
-  let month: number;
-  let day: number;
-
-  if (dateParam) {
-    const segments = dateParam.split("-");
-    if (segments.length !== 3 || segments.some((s) => isNaN(Number(s)))) {
-      return c.json(
-        { error: "Invalid date format. Use YYYY-MM-DD." },
-        400
-      );
-    }
-    year = Number(segments[0]);
-    month = Number(segments[1]);
-    day = Number(segments[2]);
-  } else {
-    const now = new Date();
-    year = now.getFullYear();
-    month = now.getMonth() + 1;
-    day = now.getDate();
-  }
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return c.json({ error: "Invalid date values." }, 400);
-  }
+  const date = parseDate(c.req.query("date"));
+  if ("error" in date) return c.json({ error: date.error }, 400);
 
   try {
-    const result = gregorianToHijri(year, month, day);
+    const result = gregorianToHijri(date.year, date.month, date.day);
     return c.json(result);
   } catch {
     return c.json({ error: "Failed to convert date." }, 500);
@@ -175,6 +153,9 @@ app.get("/prayer-times", (c) => {
     if (isNaN(latitude) || isNaN(longitude)) {
       return c.json({ error: "Invalid latitude or longitude." }, 400);
     }
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      return c.json({ error: "Latitude must be -90..90, longitude -180..180." }, 400);
+    }
   } else {
     return c.json(
       { error: "Provide lat/long or districtCode parameter." },
@@ -182,40 +163,25 @@ app.get("/prayer-times", (c) => {
     );
   }
 
-  let year: number;
-  let month: number;
-  let day: number;
+  const date = parseDate(dateParam);
+  if ("error" in date) return c.json({ error: date.error }, 400);
 
-  if (dateParam) {
-    const segments = dateParam.split("-");
-    if (segments.length !== 3 || segments.some((s) => isNaN(Number(s)))) {
-      return c.json(
-        { error: "Invalid date format. Use YYYY-MM-DD." },
-        400
-      );
-    }
-    year = Number(segments[0]);
-    month = Number(segments[1]);
-    day = Number(segments[2]);
-  } else {
-    const now = new Date();
-    year = now.getFullYear();
-    month = now.getMonth() + 1;
-    day = now.getDate();
-  }
-
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
-    return c.json({ error: "Invalid date values." }, 400);
+  const cacheKey = `prayer:${latitude}:${longitude}:${date.year}-${date.month}-${date.day}`;
+  const cached = prayerTimesCache.get(cacheKey);
+  if (cached) {
+    return c.json(cached);
   }
 
   try {
-    const result = computePrayerTimes(year, month, day, latitude, longitude);
-    return c.json({
-      date: { year, month, day },
+    const result = computePrayerTimes(date.year, date.month, date.day, latitude, longitude);
+    const response = {
+      date: { year: date.year, month: date.month, day: date.day },
       coordinates: { latitude, longitude },
       method: "Kemenag",
       times: result,
-    });
+    };
+    prayerTimesCache.set(cacheKey, response);
+    return c.json(response);
   } catch {
     return c.json({ error: "Failed to compute prayer times." }, 500);
   }
