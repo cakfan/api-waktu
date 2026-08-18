@@ -5,7 +5,7 @@ const app = new OpenAPIHono();
 
 const healthRoute = createRoute({
   method: "get",
-  path: "/",
+  path: "/health",
   tags: ["Health"],
   summary: "Health check",
   responses: {

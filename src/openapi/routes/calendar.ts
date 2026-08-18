@@ -6,6 +6,7 @@ import {
   getDaysInHijriMonth,
   getHijriMonthName,
 } from "../../hijri-calendar/convert-to-hijri";
+import { isValidGregorianDate } from "../../date-utils";
 import {
   ErrorResponseSchema,
   JavaneseDateResponseSchema,
@@ -65,7 +66,7 @@ app.openapi(javaneseDateRoute, (c) => {
     day = now.getDate();
   }
 
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
+  if (!isValidGregorianDate(year, month, day)) {
     return c.json({ error: "Invalid date values." }, 400);
   }
 
@@ -118,7 +119,7 @@ app.openapi(hijriDateRoute, (c) => {
     day = now.getDate();
   }
 
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
+  if (!isValidGregorianDate(year, month, day)) {
     return c.json({ error: "Invalid date values." }, 400);
   }
 

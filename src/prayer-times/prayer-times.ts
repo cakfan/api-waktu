@@ -1,7 +1,8 @@
 import {
-  computeSolarTime,
-  computeHourAngle,
-  computeAfternoon,
+  computeSolarTimeFromData,
+  computeHourAngleFromData,
+  computeAfternoonFromData,
+  computeSolarDayData,
 } from "./solar-time";
 
 export interface PrayerTimesParams {
@@ -52,6 +53,7 @@ function formatTime(hours: number): string {
     h += 1;
     m -= 60;
   }
+  h = ((h % 24) + 24) % 24;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
@@ -72,6 +74,10 @@ function roundedMinute(
   return (totalSeconds + offset) / 3600;
 }
 
+function isValidTime(hours: number): boolean {
+  return !isNaN(hours) && isFinite(hours);
+}
+
 export function computePrayerTimes(
   year: number,
   month: number,
@@ -79,12 +85,17 @@ export function computePrayerTimes(
   latitude: number,
   longitude: number,
   params: PrayerTimesParams = KEMENAG,
-  timezoneOffset = 7
+  timezoneOffset?: number
 ): PrayerTimes {
-  const coordinates = { latitude, longitude };
+  if (timezoneOffset === undefined) {
+    timezoneOffset = Math.round(longitude / 15);
+  }
 
-  const solarTime = computeSolarTime(year, month, day, coordinates);
-  const tomorrowSolarTime = computeSolarTime(year, month, day + 1, coordinates);
+  const todayData = computeSolarDayData(year, month, day, longitude);
+  const tomorrowData = computeSolarDayData(year, month, day + 1, longitude);
+
+  const solarTime = computeSolarTimeFromData(todayData, latitude, longitude);
+  const tomorrowSolarTime = computeSolarTimeFromData(tomorrowData, latitude, longitude);
 
   const toUtcDate = (utcHours: number, y: number, m: number, d: number): Date => {
     const totalSeconds = Math.round(utcHours * 3600);
@@ -100,7 +111,7 @@ export function computePrayerTimes(
   const nightHours = nightSeconds / 3600;
 
   let fajrTime =
-    computeHourAngle(year, month, day, coordinates, -params.fajrAngle, false) +
+    computeHourAngleFromData(todayData, latitude, longitude, -params.fajrAngle, false) +
     timezoneOffset;
 
   const safeFajrPortion = 1 / 2;
@@ -114,14 +125,8 @@ export function computePrayerTimes(
     ishaTime = solarTime.sunset + timezoneOffset + params.ishaInterval / 60;
   } else {
     ishaTime =
-      computeHourAngle(
-        year,
-        month,
-        day,
-        coordinates,
-        -params.ishaAngle,
-        true
-      ) + timezoneOffset;
+      computeHourAngleFromData(todayData, latitude, longitude, -params.ishaAngle, true) +
+      timezoneOffset;
 
     const safeIshaPortion = 1 / 2;
     const safeIsha = solarTime.sunset + timezoneOffset + safeIshaPortion * nightHours;
@@ -131,20 +136,24 @@ export function computePrayerTimes(
   }
 
   const shadowLength = params.madhab === "hanafi" ? 2 : 1;
-  const afternoonTime = computeAfternoon(
-    year,
-    month,
-    day,
-    coordinates,
-    shadowLength
-  );
+  const afternoonTime = computeAfternoonFromData(todayData, latitude, longitude, shadowLength);
+
+  const sunriseTime = solarTime.sunrise + timezoneOffset;
+  const dhuhrTime = solarTime.transit + timezoneOffset;
+  const asrTime = afternoonTime + timezoneOffset;
+  const maghribTime = solarTime.sunset + timezoneOffset;
+
+  if (!isValidTime(fajrTime) || !isValidTime(sunriseTime) || !isValidTime(dhuhrTime) ||
+      !isValidTime(asrTime) || !isValidTime(maghribTime) || !isValidTime(ishaTime)) {
+    throw new Error(`Cannot compute prayer times for latitude ${latitude}, longitude ${longitude}. Location may be in polar region.`);
+  }
 
   const rawTimes = {
     fajr: fajrTime,
-    sunrise: solarTime.sunrise + timezoneOffset,
-    dhuhr: solarTime.transit + timezoneOffset,
-    asr: afternoonTime + timezoneOffset,
-    maghrib: solarTime.sunset + timezoneOffset,
+    sunrise: sunriseTime,
+    dhuhr: dhuhrTime,
+    asr: asrTime,
+    maghrib: maghribTime,
     isha: ishaTime,
   };
 

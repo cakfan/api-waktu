@@ -5,7 +5,7 @@ const JAKARTA = { latitude: -6.2088, longitude: 106.8456 };
 
 describe("prayer times for Jakarta (Kemenag method)", () => {
   test("18 August 2026", () => {
-    const r = computePrayerTimes(2026, 8, 18, JAKARTA.latitude, JAKARTA.longitude);
+    const r = computePrayerTimes(2026, 8, 18, JAKARTA.latitude, JAKARTA.longitude, undefined, 7);
     expect(r.fajr).toBe("04:41");
     expect(r.sunrise).toBe("05:59");
     expect(r.dhuhr).toBe("11:58");
@@ -15,7 +15,7 @@ describe("prayer times for Jakarta (Kemenag method)", () => {
   });
 
   test("01 January 2026", () => {
-    const r = computePrayerTimes(2026, 1, 1, JAKARTA.latitude, JAKARTA.longitude);
+    const r = computePrayerTimes(2026, 1, 1, JAKARTA.latitude, JAKARTA.longitude, undefined, 7);
     expect(r.fajr).toBe("04:17");
     expect(r.sunrise).toBe("05:42");
     expect(r.dhuhr).toBe("11:58");
@@ -25,7 +25,7 @@ describe("prayer times for Jakarta (Kemenag method)", () => {
   });
 
   test("21 June 2026 (solstice)", () => {
-    const r = computePrayerTimes(2026, 6, 21, JAKARTA.latitude, JAKARTA.longitude);
+    const r = computePrayerTimes(2026, 6, 21, JAKARTA.latitude, JAKARTA.longitude, undefined, 7);
     expect(r.fajr).toBe("04:38");
     expect(r.sunrise).toBe("06:02");
     expect(r.dhuhr).toBe("11:56");
@@ -35,10 +35,10 @@ describe("prayer times for Jakarta (Kemenag method)", () => {
   });
 });
 
-describe("prayer times for Surabaya", () => {
+describe("prayer times for Surabaya (WIB, UTC+7)", () => {
   test("18 August 2026", () => {
     const SURABAYA = { latitude: -7.2575, longitude: 112.7521 };
-    const r = computePrayerTimes(2026, 8, 18, SURABAYA.latitude, SURABAYA.longitude);
+    const r = computePrayerTimes(2026, 8, 18, SURABAYA.latitude, SURABAYA.longitude, undefined, 7);
     expect(r.fajr).toBe("04:18");
     expect(r.sunrise).toBe("05:37");
     expect(r.dhuhr).toBe("11:34");
@@ -51,12 +51,20 @@ describe("prayer times for Surabaya", () => {
 describe("prayer times for Bandung", () => {
   test("18 August 2026", () => {
     const BANDUNG = { latitude: -6.9175, longitude: 107.6191 };
-    const r = computePrayerTimes(2026, 8, 18, BANDUNG.latitude, BANDUNG.longitude);
+    const r = computePrayerTimes(2026, 8, 18, BANDUNG.latitude, BANDUNG.longitude, undefined, 7);
     expect(r.fajr).toBe("04:38");
     expect(r.sunrise).toBe("05:57");
     expect(r.dhuhr).toBe("11:55");
     expect(r.asr).toBe("15:15");
     expect(r.maghrib).toBe("17:51");
     expect(r.isha).toBe("19:02");
+  });
+});
+
+describe("auto timezone from longitude", () => {
+  test("Jakarta auto-detects UTC+7", () => {
+    const r = computePrayerTimes(2026, 8, 18, JAKARTA.latitude, JAKARTA.longitude);
+    expect(r.fajr).toBe("04:41");
+    expect(r.dhuhr).toBe("11:58");
   });
 });

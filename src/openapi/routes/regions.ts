@@ -39,10 +39,11 @@ const regionSearchRoute = createRoute({
 
 app.openapi(regionSearchRoute, (c) => {
   const { q } = c.req.valid("query");
+  const escaped = q.replace(/%/g, "\\%").replace(/_/g, "\\_");
   const results = db
     .select()
     .from(regions)
-    .where(like(regions.districtName, `%${q.toUpperCase()}%`))
+    .where(like(regions.districtName, `%${escaped.toUpperCase()}%`))
     .limit(20)
     .all();
 

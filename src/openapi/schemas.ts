@@ -53,6 +53,7 @@ export const PrayerTimesResponseSchema = z.object({
     longitude: z.number(),
   }),
   method: z.string(),
+  timezone: z.string(),
   times: z.object({
     fajr: z.string(),
     sunrise: z.string(),

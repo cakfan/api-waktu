@@ -12,6 +12,11 @@ const app = new OpenAPIHono();
 app.use("*", logger());
 app.use("*", cors());
 
+app.route("/", healthRoutes);
+app.route("/", calendarRoutes);
+app.route("/", prayerTimesRoutes);
+app.route("/regions", regionsRoutes);
+
 app.get("/", (c) => {
   return c.json({
     name: "api-waktu",
@@ -20,11 +25,6 @@ app.get("/", (c) => {
     docs: "GET /docs",
   });
 });
-
-app.route("/", healthRoutes);
-app.route("/", calendarRoutes);
-app.route("/", prayerTimesRoutes);
-app.route("/regions", regionsRoutes);
 
 app.doc("/openapi.json", {
   openapi: "3.0.3",

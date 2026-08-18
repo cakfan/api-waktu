@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { computePrayerTimes } from "../../prayer-times/prayer-times";
+import { isValidGregorianDate } from "../../date-utils";
 import { prayerTimesCache } from "../../cache";
 import { db } from "../../db";
 import { regions } from "../../db/schema";
@@ -28,6 +29,11 @@ const prayerTimesQuerySchema = z.object({
     param: { name: "date", in: "query" },
     description: "Date in YYYY-MM-DD format (default: today)",
     example: "2026-08-18",
+  }),
+  tz: z.string().optional().openapi({
+    param: { name: "tz", in: "query" },
+    description: "UTC offset in hours (default: auto from longitude). Examples: 7 for WIB, 8 for WITA, 9 for WIT",
+    example: "7",
   }),
 });
 
@@ -105,26 +111,36 @@ app.openapi(prayerTimesRoute, (c) => {
     day = now.getDate();
   }
 
-  if (month < 1 || month > 12 || day < 1 || day > 31) {
+  if (!isValidGregorianDate(year, month, day)) {
     return c.json({ error: "Invalid date values." }, 400);
   }
 
-  const cacheKey = `prayer:${latitude}:${longitude}:${year}-${month}-${day}`;
+  let timezoneOffset: number | undefined;
+  if (query.tz) {
+    timezoneOffset = Number(query.tz);
+    if (isNaN(timezoneOffset) || timezoneOffset < -12 || timezoneOffset > 14) {
+      return c.json({ error: "Invalid timezone offset. Must be -12 to 14." }, 400);
+    }
+  }
+
+  const cacheKey = `prayer:${latitude}:${longitude}:${year}-${month}-${day}:${timezoneOffset ?? "auto"}`;
   const cached = prayerTimesCache.get(cacheKey);
   if (cached) return c.json(cached, 200);
 
   try {
-    const result = computePrayerTimes(year, month, day, latitude, longitude);
+    const result = computePrayerTimes(year, month, day, latitude, longitude, undefined, timezoneOffset);
     const response = {
       date: { year, month, day },
       coordinates: { latitude, longitude },
       method: "Kemenag",
+      timezone: timezoneOffset !== undefined ? `UTC${timezoneOffset >= 0 ? "+" : ""}${timezoneOffset}` : `UTC${Math.round(longitude / 15) >= 0 ? "+" : ""}${Math.round(longitude / 15)}`,
       times: result,
     };
     prayerTimesCache.set(cacheKey, response);
     return c.json(response, 200);
-  } catch {
-    return c.json({ error: "Failed to compute prayer times." }, 500);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to compute prayer times.";
+    return c.json({ error: message }, 500);
   }
 });
 
