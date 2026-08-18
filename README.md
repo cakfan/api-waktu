@@ -37,13 +37,11 @@ Convert Gregorian date to Javanese calendar (day-of-week, pasaran, wuku).
 
 ```json
 {
-  "year": 2026,
-  "month": 8,
-  "day": 18,
   "dayOfWeek": "Selasa",
   "pasaran": "Pahing",
   "wuku": "Medangkungan",
-  "javaneseYear": 1960
+  "neptu": 10,
+  "date": "2026-08-18"
 }
 ```
 
@@ -144,6 +142,16 @@ Lookup kecamatan by Kemendagri code (e.g. `31.71.01`).
 
 Returns server status and list of available endpoints.
 
+### Documentation
+
+#### `GET /docs`
+
+Interactive Swagger UI with dark mode support. Try out endpoints directly in the browser.
+
+#### `GET /openapi.json`
+
+OpenAPI 3.0.3 spec (JSON). Can be imported into Postman, Insomnia, etc.
+
 ## Database
 
 SQLite database is stored at `data/database.sqlite`. Region data is seeded from [api-wilayah-indonesia](https://github.com/cakfan/api-wilayah-indonesia) via:
@@ -158,7 +166,8 @@ Schema includes: province, regency (kabupaten/kota), district (kecamatan), with 
 
 ```
 src/
-  index.ts                        # Hono app entry point
+  index.ts                        # Hono app entry point (OpenAPIHono)
+  cache.ts                        # In-memory cache per location/day
   db/
     index.ts                      # SQLite connection via Drizzle
     schema.ts                     # Drizzle table definitions
@@ -174,6 +183,14 @@ src/
     solar-time.ts                 # Solar time (transit, sunrise, sunset)
     prayer-times.ts               # Prayer times engine (Kemenag method)
     prayer-times.test.ts
+  openapi/
+    schemas.ts                    # Zod schemas for OpenAPI
+    swagger-html.ts               # Custom Swagger UI (dark mode)
+    routes/
+      health.ts                   # Health check route
+      calendar.ts                 # Javanese & Hijri calendar routes
+      prayer-times.ts             # Prayer times routes
+      regions.ts                  # Region lookup routes
 scripts/
   seed-regions.ts                 # Import kecamatan data to SQLite
 data/
