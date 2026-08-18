@@ -1,9 +1,10 @@
-import { readFileSync, mkdirSync } from "fs";
+import { readFileSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Database } from "bun:sqlite";
 
 const RAW_DIR = join(import.meta.dir, "..", "data", "raw");
 const DB_PATH = join(import.meta.dir, "..", "data.db");
+const JSON_PATH = join(import.meta.dir, "..", "data", "regions.json");
 
 interface RawProvince {
   code: string;
@@ -153,7 +154,11 @@ function seed() {
   insertMany(rows);
   sqlite.close();
 
-  console.log(`Done! Inserted ${rows.length} rows into ${DB_PATH}`);
+  console.log(`Writing JSON to ${JSON_PATH}...`);
+  mkdirSync(join(import.meta.dir, "..", "data"), { recursive: true });
+  writeFileSync(JSON_PATH, JSON.stringify(rows));
+
+  console.log(`Done! Inserted ${rows.length} rows into ${DB_PATH} and ${JSON_PATH}`);
 }
 
 seed();

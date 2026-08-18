@@ -2,7 +2,6 @@
   "installCommand": "bun install",
   "functions": {
     "api/index.ts": {
-      "runtime": "bun",
       "maxDuration": 30
     }
   },

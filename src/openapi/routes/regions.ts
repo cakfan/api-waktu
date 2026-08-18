@@ -1,7 +1,5 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { db } from "../../db";
-import { regions } from "../../db/schema";
-import { eq, like } from "drizzle-orm";
+import { findDistrict, searchDistricts } from "../../db";
 import {
   ErrorResponseSchema,
   RegionResponseSchema,
@@ -39,14 +37,7 @@ const regionSearchRoute = createRoute({
 
 app.openapi(regionSearchRoute, (c) => {
   const { q } = c.req.valid("query");
-  const escaped = q.replace(/%/g, "\\%").replace(/_/g, "\\_");
-  const results = db
-    .select()
-    .from(regions)
-    .where(like(regions.districtName, `%${escaped.toUpperCase()}%`))
-    .limit(20)
-    .all();
-
+  const results = searchDistricts(q);
   return c.json({ query: q, count: results.length, results }, 200);
 });
 
@@ -79,11 +70,7 @@ const regionByCodeRoute = createRoute({
 
 app.openapi(regionByCodeRoute, (c) => {
   const code = c.req.valid("param").districtCode;
-  const result = db
-    .select()
-    .from(regions)
-    .where(eq(regions.districtCode, code))
-    .get();
+  const result = findDistrict(code);
 
   if (!result) {
     return c.json({ error: `District not found: ${code}` }, 404);

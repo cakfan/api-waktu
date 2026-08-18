@@ -2,9 +2,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { computePrayerTimes, METHODS } from "../../prayer-times/prayer-times";
 import { isValidGregorianDate } from "../../date-utils";
 import { prayerTimesCache } from "../../cache";
-import { db } from "../../db";
-import { regions } from "../../db/schema";
-import { eq } from "drizzle-orm";
+import { findDistrict } from "../../db";
 import {
   ErrorResponseSchema,
   PrayerTimesResponseSchema,
@@ -45,7 +43,7 @@ const baseQuerySchema = z.object({
 
 function resolveCoords(query: { lat?: string; long?: string; districtCode?: string }, c: any): { latitude: number; longitude: number } | { Response: any } {
   if (query.districtCode) {
-    const region = db.select().from(regions).where(eq(regions.districtCode, query.districtCode!)).get();
+    const region = findDistrict(query.districtCode);
     if (!region) return { Response: c.json({ error: `District not found: ${query.districtCode}` }, 404) };
     return { latitude: region.latitude, longitude: region.longitude };
   }
