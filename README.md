@@ -171,9 +171,24 @@ Interactive Swagger UI with dark mode support. Try out endpoints directly in the
 
 OpenAPI 3.0.3 spec (JSON). Can be imported into Postman, Insomnia, etc.
 
+## Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+bun add -g vercel
+
+# Deploy (follow prompts)
+vercel
+
+# Production deploy
+vercel --prod
+```
+
+Uses Bun runtime. The `data.db` SQLite database (seeded kecamatan data) is committed to the repo and ships with the deployment. All routes are handled by a single serverless function via rewrites.
+
 ## Database
 
-SQLite database is stored at `data/database.sqlite`. Region data is seeded from [api-wilayah-indonesia](https://github.com/cakfan/api-wilayah-indonesia) via:
+SQLite database is stored at `data.db`. Region data is seeded from [api-wilayah-indonesia](https://github.com/cakfan/api-wilayah-indonesia) via:
 
 ```bash
 bun run db:seed
@@ -184,8 +199,12 @@ Schema includes: province, regency (kabupaten/kota), district (kecamatan), with 
 ## Project Structure
 
 ```
+api/
+  index.ts                        # Vercel serverless entry point
 src/
-  index.ts                        # Hono app entry point (OpenAPIHono)
+  app.ts                          # Hono app creation (shared by Vercel & Bun)
+  index.ts                        # Bun server entry point (local dev)
+  rate-limit.ts                   # In-memory rate limiter
   cache.ts                        # In-memory cache per location/day
   db/
     index.ts                      # SQLite connection via Drizzle
@@ -200,7 +219,7 @@ src/
     math-utils.ts                 # Degree/radian math utilities
     astronomical.ts               # Solar position calculations (Jean Meeus)
     solar-time.ts                 # Solar time (transit, sunrise, sunset)
-    prayer-times.ts               # Prayer times engine (Kemenag method)
+    prayer-times.ts               # Prayer times engine (multi-method)
     prayer-times.test.ts
   openapi/
     schemas.ts                    # Zod schemas for OpenAPI
@@ -208,12 +227,13 @@ src/
     routes/
       health.ts                   # Health check route
       calendar.ts                 # Javanese & Hijri calendar routes
-      prayer-times.ts             # Prayer times routes
+      prayer-times.ts             # Prayer times routes (daily + monthly)
       regions.ts                  # Region lookup routes
 scripts/
   seed-regions.ts                 # Import kecamatan data to SQLite
 data/
   raw/                            # Raw JSON from api-wilayah-indonesia (gitignored)
+vercel.json                       # Vercel deployment config
 ```
 
 ## Testing

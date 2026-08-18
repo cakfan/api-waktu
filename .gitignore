@@ -27,8 +27,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .cache
 *.tsbuildinfo
 
-# database
-*.db
+# database journals (data.db is committed for Vercel deployment)
 *.db-journal
 *.db-wal
 *.db-shm

@@ -1,0 +1,12 @@
+{
+  "installCommand": "bun install",
+  "functions": {
+    "api/index.ts": {
+      "runtime": "bun",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/api/index.ts" }
+  ]
+}
