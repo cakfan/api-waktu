@@ -1,5 +1,8 @@
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface Region {
   provinceCode: string;
@@ -14,7 +17,7 @@ export interface Region {
 }
 
 const regions: Region[] = JSON.parse(
-  readFileSync(join(import.meta.dir, "..", "..", "data", "regions.json"), "utf-8")
+  readFileSync(join(__dirname, "..", "..", "data", "regions.json"), "utf-8")
 );
 
 const byCode = new Map<string, Region>();
